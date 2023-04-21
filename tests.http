@@ -1,0 +1,43 @@
+get http://localhost:3000/students/all
+
+###
+
+post http://localhost:3000/students/register
+Content-Type: application/json
+
+{ 
+    "first_name" : "lakshitha", 
+    "last_name" : "srimal", 
+    "project_title" : "test", 
+    "email" : "lakshithasrimal22@gmail.com", 
+    "phone_number" : "0766595991", 
+    "time_slot" : "1"
+} 
+
+###
+
+post http://localhost:3000/students/is_exist
+Content-Type: application/json
+
+{ 
+    "first_name" : "lakshitha", 
+    "last_name" : "srimal", 
+    "project_title" : "test", 
+    "email" : "lakshithasrimal22@gmail.com", 
+    "phone_number" : "0766595991"
+} 
+
+###
+
+post http://localhost:3000/timeslots/add
+Content-Type: application/json
+
+ { 
+    "date" : "2023-04-21", 
+    "start_time" : "21:00:00", 
+    "end_time": "22:00:00", 
+    "available_seats":"6" 
+ } 
+
+###
+get http://localhost:3000/timeslots/all

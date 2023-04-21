@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Project Timeslots Mangement Tool</title>
+    <link rel="stylesheet" type="text/css" href="styles.css">
+</head>
+
+<body>
+    <header>
+        <nav>
+            <ul>
+                <li><a href="index.html" class="active">Registered Student</a></li>
+                <li><a href="register.html">Register a Student</a></li>
+                <li><a href="timeslots.html">Available Timeslots</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <h1>Registered Students</h1>
+        <table id="student-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Project Title</th>
+                    <th>Email</th>
+                    <th>Phone Number</th>
+                    <th>Time Slot</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- This will be populated by JavaScript -->
+            </tbody>
+        </table>
+        <div id="error-message"></div>
+
+    </main>
+
+    <footer>
+        <p>Copyright &copy; 2023</p>
+    </footer>
+
+    <script>
+
+        // Make a GET request to the specified URL
+        fetch('/timeslots/all')
+            .then(response => {
+                // Check if the response was successful
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                // Parse the response as JSON
+                return response.json();
+            })
+            .then(slots => {
+
+                // Make a GET request to the specified URL
+                fetch('/students/all')
+                    .then(response => {
+                        // Check if the response was successful
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        // Parse the response as JSON
+                        return response.json();
+                    })
+                    .then(students => {
+
+                        // Build the HTML for the table rows
+                        const rowsHtml = students.map(student => {
+                            const slot = slots.filter(s => {
+                                return s.id == student.time_slot;
+                            })[0];
+
+                            return (` 
+                            <tr>
+                                <td>${student.id}</td>
+                                <td>${student.first_name}</td>
+                                <td>${student.last_name}</td>
+                                <td>${student.project_title}</td>
+                                <td>${student.email}</td>
+                                <td>${student.phone_number}</td>
+                                <td>${slot.date} ${slot.start_time} - ${slot.end_time}</td>
+                                </tr>
+                            `)
+                        }).join('');
+
+                        // Add the rows to the table
+                        document.querySelector('#student-table tbody').innerHTML = rowsHtml;
+                    })
+                    .catch(error => {
+                        // Display the error message in a div on the page
+                        document.querySelector('#error-message').textContent = `Error: ${error.message}`;
+                    });
+
+            })
+            .catch(error => {
+                // Display the error message in a div on the page
+                document.querySelector('#error-message').textContent = `Error: ${error.message}`;
+            });
+
+
+    </script>
+</body>
+
+</html>

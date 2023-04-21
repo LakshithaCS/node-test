@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Project Timeslots Mangement Tool</title>
+	<link rel="stylesheet" type="text/css" href="styles.css">
+</head>
+<body>
+	<header>
+		<nav>
+			<ul>
+				<li><a href="index.html">Registered Student</a></li>
+				<li><a href="register.html">Register a Student</a></li>
+				<li><a href="timeslots.html" class="active">Available Timeslots</a></li>
+			</ul>
+		</nav>
+	</header>
+	
+	<main>
+		<h1>Available Timeslots</h1>
+        <table id="slots-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Date</th>
+                    <th>Start Time</th>
+                    <th>End Time</th>
+                    <th>Available Seats</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- This will be populated by JavaScript -->
+            </tbody>
+        </table>
+        <div id="error-message"></div>
+	</main>
+	
+	<footer>
+		<p>Copyright &copy; 2023</p>
+	</footer>
+
+	<script>
+        // Make a GET request to the specified URL
+        fetch('/timeslots/all')
+            .then(response => {
+                // Check if the response was successful
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                // Parse the response as JSON
+                return response.json();
+            })
+            .then(slots => {
+                // Build the HTML for the table rows
+                const rowsHtml = slots.map(slot => `
+              <tr>
+                <td>${slot.id}</td>
+                <td>${slot.date}</td>
+                <td>${slot.start_time}</td>
+                <td>${slot.end_time}</td>
+                <td>${slot.available_seats}</td>
+              </tr>
+            `).join('');
+                // Add the rows to the table
+                document.querySelector('#slots-table tbody').innerHTML = rowsHtml;
+            })
+            .catch(error => {
+                // Display the error message in a div on the page
+                document.querySelector('#error-message').textContent = `Error: ${error.message}`;
+            });
+    </script>
+</body>
+</html>

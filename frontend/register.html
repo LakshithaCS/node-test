@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<title>Project Timeslots Mangement Tool</title>
+	<link rel="stylesheet" type="text/css" href="styles.css">
+	<style>
+		/* Define some styles for the form */
+		form {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			width: 80%;
+			margin: 2em auto;
+			padding: 2em;
+			border-radius: 1em;
+			box-shadow: 0 0 1em #ccc;
+			background-color: #f2f2f2;
+			font-size: 1.2em;
+		}
+
+		label {
+			display: block;
+			margin-bottom: 0.5em;
+			font-weight: bold;
+			color: #666;
+		}
+
+		input,
+		select {
+			width: 100%;
+			margin-bottom: 1em;
+			padding: 0.5em;
+			border-radius: 0.5em;
+			border: none;
+			background-color: #fff;
+			font-size: 1.2em;
+		}
+
+		select {
+			cursor: pointer;
+		}
+
+		button[type="submit"] {
+			padding: 0.5em 1em;
+			border-radius: 0.5em;
+			border: none;
+			background-color: #666;
+			color: #fff;
+			font-size: 1.2em;
+			cursor: pointer;
+		}
+
+		button[type="submit"]:hover {
+			background-color: #333;
+		}
+
+		#error-message {
+			margin-top: 1em;
+			color: red;
+			font-weight: bold;
+		}
+	</style>
+</head>
+
+<body>
+	<header>
+		<nav>
+			<ul>
+				<li><a href="index.html">Registered Student</a></li>
+				<li><a href="register.html" class="active">Register a Student</a></li>
+				<li><a href="timeslots.html">Available Timeslots</a></li>
+			</ul>
+		</nav>
+	</header>
+
+	<main>
+		<form id="registration-form">
+			<label for="first_name">First Name:</label>
+			<input type="text" id="first_name" name="first_name" required>
+			<label for="last_name">Last Name:</label>
+			<input type="text" id="last_name" name="last_name" required>
+			<label for="project_title">Project Title:</label>
+			<input type="text" id="project_title" name="project_title" required>
+			<label for="email">Email:</label>
+			<input type="email" id="email" name="email" required>
+			<label for="phone_number">Phone Number:</label>
+			<input type="tel" id="phone_number" name="phone_number" required>
+			<label for="time_slot">Time Slot:</label>
+			<select id="time_slot" name="time_slot" required>
+				<option value="" disabled selected>Select a time slot</option>
+			</select>
+			<button type="submit">Submit</button>
+		</form>
+		<div id="error-message"></div>
+	</main>
+
+	<footer>
+		<p>Copyright &copy; 2023</p>
+	</footer>
+
+	<script>
+		function validateEmail(email) {
+			const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+			return emailRegex.test(email);
+		}
+
+		function validatePhoneNumber(phoneNumber) {
+			const phoneRegex = /^\d{9}$/;
+			return phoneRegex.test(phoneNumber);
+		}
+
+		const form = document.querySelector('#registration-form');
+		const errorDiv = document.querySelector('#error-message');
+		const timeSlotSelect = form.time_slot;
+
+		// Fetch the available time slots and populate the select option
+		async function populateTimeSlots() {
+			const response = await fetch('/timeslots/all');
+			const data = await response.json();
+			timeSlotSelect.innerHTML = data.map(slot => {
+				return `<option value="${slot.id}">${slot.date} ${slot.start_time} - ${slot.end_time} (${slot.available_seats} seats available)</option>`;
+			}).join('');
+		}
+		populateTimeSlots();
+
+		form.addEventListener('submit', async event => {
+			event.preventDefault();
+
+			const firstName = form.first_name.value.trim();
+			const lastName = form.last_name.value.trim();
+			const projectTitle = form.project_title.value.trim();
+			const email = form.email.value.trim();
+			const phoneNumber = form.phone_number.value.trim();
+			const timeSlot = timeSlotSelect.value;
+
+			// Validate the form data
+			if (firstName === '' || lastName === '' || projectTitle === '' || email === '' || phoneNumber === '' || timeSlot === '') {
+				alert('Please fill in all fields.');
+				return;
+			}
+			if (!validateEmail(email)) {
+				alert('Please enter a valid email address.');
+				return;
+			}
+			if (!validatePhoneNumber(phoneNumber)) {
+				alert('Please enter a valid 9-digit phone number.');
+				return;
+			}
+
+			const data = {
+				first_name: form.first_name.value,
+				last_name: form.last_name.value,
+				project_title: form.project_title.value,
+				email: form.email.value,
+				phone_number: form.phone_number.value,
+				time_slot: form.time_slot.value,
+			};
+
+			// Check if the user has already registered
+			const isExistResponse = await fetch('/students/is_exist', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify(data),
+			});
+			const isExistData = await isExistResponse.json();
+			if (isExistData) {
+				const confirmChange = confirm('You have already registered, do you want to change your time slot?');
+				if (!confirmChange) {
+					return;
+				}
+			}
+
+			// Submit the registration form
+			const registerResponse = await fetch('/students/register', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify(data),
+			});
+			if (!registerResponse.ok) {
+				const errorData = await registerResponse.json();
+				errorDiv.textContent = errorData.message;
+				return;
+			}
+
+			// Clear the form and display a success message
+			form.reset();
+			alert('Registration successful!');
+		});
+
+	</script>
+</body>
+
+</html>
