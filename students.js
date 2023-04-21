@@ -35,12 +35,14 @@ router.post('/register', async (req, res) => {
               [student.id, student.first_name, student.last_name, student.project_title, student.email, student.phone_number, student.time_slot],
               (error, result) => {
                 if (error) {
-                  res.status(500).json({ message: 'Internal Sever Error' });
+                  //console.log(error);
+                  res.status(500).json({ message: error });
                 }
                 else {
                   pool.query('UPDATE time_slots SET available_seats = available_seats - 1 WHERE id = ?', [student.time_slot], (error, result) => {
                     if (error) {
-                      res.status(500).json({ message: 'Internal Sever Error' });
+                      console.log(error);
+                      res.status(500).json({ message: error });
                     }
                     else {
                       res.status(200).json({ message: 'Student registered successfully' });
@@ -60,7 +62,7 @@ router.post('/register', async (req, res) => {
 
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: 'Internal server error' });
+    res.status(500).json({ message: err });
   }
 });
 
@@ -68,7 +70,7 @@ router.get('/all', (req, res) => {
   pool.query('SELECT * FROM students', (error, results) => {
     if (error) {
       console.error(error);
-      res.status(500).send('Error retrieving students');
+      res.status(500).json({ message: error });
     } else {
       res.status(200).json(results);
     }

@@ -6,7 +6,7 @@ const router = express.Router();
 router.get('/all', (req, res) => {
     db.query('SELECT * FROM time_slots', (error, results) => {
         if (error) {
-            console.error(error);
+            res.status(500).json({ message: error });
             res.status(500).send('Error retrieving available time slots');
         } else {
             res.status(200).json(results);
@@ -20,7 +20,7 @@ router.post('/add', (req, res) => {
     db.query('INSERT INTO time_slots (date, start_time, end_time, available_seats) VALUES (?, ?, ?, ?)', [date, start_time, end_time, available_seats], (error, results) => {
         if (error) {
             console.error(error);
-            res.status(500).send('Error creating new time slot');
+            res.status(500).json({ message: error });
         } else {
             res.status(200).send(`New time slot created with ID ${results.insertId}`);
         }

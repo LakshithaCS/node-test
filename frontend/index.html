@@ -94,12 +94,14 @@
                     .catch(error => {
                         // Display the error message in a div on the page
                         document.querySelector('#error-message').textContent = `Error: ${error.message}`;
+                        console.log(error)
                     });
 
             })
             .catch(error => {
                 // Display the error message in a div on the page
                 document.querySelector('#error-message').textContent = `Error: ${error.message}`;
+                console.log(error)
             });
 
 

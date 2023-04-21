@@ -7,7 +7,7 @@ const pool = mysql.createPool({
 });
 
 pool.query(`CREATE TABLE IF NOT EXISTS students (
-  id INT NOT NULL,
+  id VARCHAR(100) NOT NULL,
   first_name VARCHAR(50),
   last_name VARCHAR(50),
   project_title VARCHAR(50),
